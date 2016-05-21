@@ -23,7 +23,13 @@ public class Connector {
         } catch (SQLException SQLE) {
             SQLE.printStackTrace();
         }finally{
-            //TODO close connection
+            try {
+                if (conn != null && !conn.isClosed()) {
+                    conn.close();
+                }
+            }catch(SQLException SQLE){
+                SQLE.printStackTrace();
+            }
         }
 
     }

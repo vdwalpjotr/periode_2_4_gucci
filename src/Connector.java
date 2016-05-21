@@ -56,4 +56,8 @@ public class Connector {
         }
         return connected;
     }
+
+    public Connection getConnection(){
+        return conn;
+    }
 }

@@ -61,7 +61,6 @@ public class SQLExecutor {
 
     public void select_query(int customer_id, String month) {
         conn.connect();
-
         try {
             PreparedStatement get_id = null;
             String query1 = "SELECT KLANT.MOBIEL_NUMMER " +
@@ -87,7 +86,6 @@ public class SQLExecutor {
             sms_set.next();
 
             int count_sms = sms_set.getInt("count_sms");
-            conn.getConnection().
 
             PreparedStatement count_bel_customer = null;
             String query3 = "SELECT " +
@@ -118,6 +116,57 @@ public class SQLExecutor {
             e.printStackTrace();
         }
 
+        conn.closeConnection();
+    }
+
+    public void customerDetails(int customer_id) {
+        conn.connect();
+        try {
+            PreparedStatement get_id = null;
+            String query1 = "SELECT * " +
+                    "FROM BK.KLANT " +
+                    "WHERE KLANT.KLANT_ID = ?";
+
+            get_id = conn.getConnection().prepareStatement(query1);
+            get_id.setInt(1,customer_id);
+            ResultSet klant_set = get_id.executeQuery();
+            klant_set.next();
+
+            String phone_number = klant_set.getString("MOBIEL_NUMMER");
+            System.out.println(phone_number);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        conn.closeConnection();
+    }
+
+    public void countMessages(String phone_number) {
+        conn.connect();
+        try {
+
+            PreparedStatement count_sms_customer = null;
+            String query2 = "SELECT * " +
+                    "FROM BK.BEL_HISTORIE";
+
+            count_sms_customer = conn.getConnection().prepareStatement(query2);
+            //count_sms_customer.setString(1,phone_number);
+            ResultSet sms_set = count_sms_customer.executeQuery();
+
+            if (sms_set.next() == false) {
+                System.out.println("empty");
+            }
+
+            while(sms_set.next()) {
+                System.out.println(sms_set.getString(1));
+            }
+
+//            int count_sms = sms_set.getInt("count_sms");
+//            System.out.println(count_sms);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         conn.closeConnection();
     }
 

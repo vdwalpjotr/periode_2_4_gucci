@@ -131,6 +131,12 @@ public class SQLExecutor {
 
     }
 
+    /**
+     * Returns mobile numbers of 2 phonenumbers.
+     * @param klantIDZender
+     * @param klantIDOntvanger
+     * @return
+     */
     private String[] getSMSHistorieMobiel(int klantIDZender, int klantIDOntvanger){
         String[] awnser = new String[2];
         Statement stmt;

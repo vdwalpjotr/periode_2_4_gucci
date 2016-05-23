@@ -10,6 +10,6 @@ public class Main {
     public static void main(String[] args) {
         Connector connector = new Connector();
         SQLExecutor sqlExecutor = new SQLExecutor(connector);
-        sqlExecutoe.insertCustomers();
+        sqlExecutor.insertCustomers();
     }
 }

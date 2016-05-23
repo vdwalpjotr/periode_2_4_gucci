@@ -10,8 +10,6 @@ public class Main {
     public static void main(String[] args) {
         Connector connector = new Connector();
         SQLExecutor sqlExecutor = new SQLExecutor(connector);
-//        sqlExecutor.select_query(2, "May");
-        //sqlExecutor.customerDetails(2);
-        sqlExecutor.countMessages("0616675929");
+        sqlExecutor.select_query(2, "May");
     }
 }

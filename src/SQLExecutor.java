@@ -1,3 +1,4 @@
+import oracle.jdbc.proxy.annotation.Pre;
 import oracle.sql.DATE;
 
 import javax.xml.transform.Result;
@@ -14,6 +15,9 @@ public class SQLExecutor {
     public static final String INSERT_SMS_HISTORIE = "INSERT INTO BK.SMS_HISTORIE "
             + "(MOBIEL_ZENDER, MOBIEL_ONTVANGER, BERICHT_LENGTE, DATUM_TIJD_VERSTUURD, CODED_SMS) "
             + "VALUES(?, ?, ?, ?, ?)";
+    public static final String INSERT_BEL_HISTORIE = "INSERT INTO BK.BEL_HISTORIE "
+            + "(MOBIEL_ZENDER, MOBIEL_ONTVANGER, START_DATUM_TIJD, EIND_DATUM_TIJD) "
+            + "VALUES(?,?,?,?)";
 
     private Connector conn;
     public SQLExecutor(Connector conn){
@@ -67,7 +71,7 @@ public class SQLExecutor {
     }
 
     /**
-     * Inserts the sms historie
+     * Inserts the sms historie using the customer IDs
      * @param klantIDZender
      * @param klantIDOntvanger
      * @param berichtLengte
@@ -92,8 +96,27 @@ public class SQLExecutor {
         }catch(SQLException SQL){
             SQL.printStackTrace();
         }
+    }
+
+    public void insertBelHistorie(int klantIDZender,int klantIDOntvanger, int conversationLength ){
+        String[] mobielNummers = getSMSHistorieMobiel(klantIDZender, klantIDOntvanger);
+        String mobielZender = mobielNummers[0];
+        String mobielOntvanger = mobielNummers[1];
+        long current_time = System.currentTimeMillis();
+        long end_time = current_time + (conversationLength *1000);
 
 
+        try{
+            PreparedStatement insertBel = conn.getConnection().prepareStatement(INSERT_BEL_HISTORIE);
+            insertBel.setString(1, mobielZender);
+            insertBel.setString(2, mobielOntvanger);
+            insertBel.setTimestamp(3, new Timestamp(current_time));
+            insertBel.setTimestamp(4, new Timestamp(end_time));
+            insertBel.executeUpdate();
+            insertBel.close();
+        }catch(SQLException SQL){
+            SQL.printStackTrace();
+        }
     }
 
     /**
@@ -113,7 +136,7 @@ public class SQLExecutor {
         Statement stmt;
         String selectPhoneNumbersQuery = "SELECT KLANT_ID, MOBIEL_NUMMER FROM BK.KLANT WHERE KLANT_ID="+klantIDZender
                 +" OR KLANT_ID="+klantIDOntvanger;
-        System.out.println(selectPhoneNumbersQuery);
+
         ResultSet rs;
         try{
             stmt = conn.getConnection().createStatement();
@@ -132,8 +155,7 @@ public class SQLExecutor {
             SQLE.printStackTrace();
         }finally
         {
-            System.out.println(awnser[0]);
-            System.out.println(awnser[1]);
+
         }
         return awnser;
     }

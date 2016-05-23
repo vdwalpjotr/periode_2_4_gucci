@@ -11,27 +11,25 @@ public class Main {
         Connector connector = new Connector();
         connector.connect();
         SQLExecutor sqlExecutor = new SQLExecutor(connector);
-        Random rand = new Random();
-        RandomDateGen randomDateGen = new RandomDateGen(2016);
-        String randomDate = "";
+//        Random rand = new Random();
+//        RandomDateGen randomDateGen = new RandomDateGen(2016);
+//        String randomDate = "";
+//
+//        for(int i=0; i<1000; i++){
+//            int verzender = rand.nextInt(1000)+1019;
+//            int ontvanger = rand.nextInt(1000)+1019;
+//            int time = rand.nextInt(299)+1;
+//            if(verzender == ontvanger){
+//                ontvanger++;
+//            }
+//            randomDate = randomDateGen.getRandomDate();
+//            System.out.println(randomDate);
+//            sqlExecutor.insertSMSHistorie(verzender, ontvanger, 20, randomDate,"Dit is een voorbeeld smsje");
+//            sqlExecutor.insertBelHistorie(verzender, ontvanger, time);
+//        }
+        sqlExecutor.customer_call_sms_useage(2, "May");
 
-        for(int i=0; i<1000; i++){
-            int verzender = rand.nextInt(1000)+1019;
-            int ontvanger = rand.nextInt(1000)+1019;
-            int time = rand.nextInt(299)+1;
-            if(verzender == ontvanger){
-                ontvanger++;
-            }
-            randomDate = randomDateGen.getRandomDate();
-            System.out.println(randomDate);
-            sqlExecutor.insertSMSHistorie(verzender, ontvanger, 20, randomDate,"Dit is een voorbeeld smsje");
-            sqlExecutor.insertBelHistorie(verzender, ontvanger, time);
-        }
-        try {
-            connector.getConnection().close();
-        }catch(SQLException e){
-            e.printStackTrace();
-        }
+        connector.closeConnection();
 
 
     }

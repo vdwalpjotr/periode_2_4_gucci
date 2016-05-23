@@ -1,23 +1,37 @@
-import oracle.jdbc.proxy.annotation.Pre;
-import oracle.sql.DATE;
-
-import javax.xml.transform.Result;
 import java.sql.*;
 import java.util.Random;
 
-/**
- * Created by peter on 21-May-16.
- */
 public class SQLExecutor {
     public static final String INSERT_CUSTOMERS = "INSERT INTO BK.KLANT "
             + "(VOORNAAM, ACHTERNAAM, GESLACHT, MOBIEL_NUMMER, HUISNUMMER, POSTCODE, PLAATS, START_DATUM_CONTRACT, EIND_DATUM_CONTRACT, ABONNEMENT_NAAM, STRAATNAAM) "
             + "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
     public static final String INSERT_SMS_HISTORIE = "INSERT INTO BK.SMS_HISTORIE "
             + "(MOBIEL_ZENDER, MOBIEL_ONTVANGER, BERICHT_LENGTE, DATUM_TIJD_VERSTUURD, CODED_SMS) "
             + "VALUES(?, ?, ?, ?, ?)";
     public static final String INSERT_BEL_HISTORIE = "INSERT INTO BK.BEL_HISTORIE "
             + "(MOBIEL_ZENDER, MOBIEL_ONTVANGER, START_DATUM_TIJD, EIND_DATUM_TIJD) "
             + "VALUES(?,?,?,?)";
+
+    public static final String CUSTORMER_PHONE_NUMBER = "SELECT KLANT.MOBIEL_NUMMER " +
+            "FROM BK.KLANT " +
+            "WHERE KLANT.KLANT_ID = ?";
+
+    public static final String CUSTOMER_COUNT_SMS = "SELECT COUNT(*) AS count_sms " +
+            "FROM BK.SMS_HISTORIE " +
+            "WHERE SMS_HISTORIE.MOBIEL_ZENDER = ? " +
+            "AND to_char(SMS_HISTORIE.DATUM_TIJD_VERSTUURD, 'Month') LIKE ?";
+
+    public static final String CUSTOMER_CALL_MINUTES = "SELECT " +
+            "  SUM( " +
+            "    ((EXTRACT(DAY FROM (BEL_HISTORIE.EIND_DATUM_TIJD - BEL_HISTORIE.START_DATUM_TIJD)) * (24 * 60)) + " +
+            "    (EXTRACT(HOUR FROM (BEL_HISTORIE.EIND_DATUM_TIJD - BEL_HISTORIE.START_DATUM_TIJD)) * 60) + " +
+            "    EXTRACT(MINUTE FROM (BEL_HISTORIE.EIND_DATUM_TIJD - BEL_HISTORIE.START_DATUM_TIJD))) " +
+            "  ) AS sum_minutes " +
+            "FROM BK.BEL_HISTORIE " +
+            "WHERE BEL_HISTORIE.MOBIEL_ZENDER = ? " +
+            "AND to_char(BEL_HISTORIE.START_DATUM_TIJD, 'Month') LIKE ? " +
+            "AND to_char(BEL_HISTORIE.EIND_DATUM_TIJD, 'Month') LIKE ?";
 
     private Connector conn;
     public SQLExecutor(Connector conn){
@@ -166,4 +180,95 @@ public class SQLExecutor {
         return awnser;
     }
 
+    /**
+     * Calculates and prints the number of sms messages send and minutes called by the customer in a specific month.
+     * @param customer_id
+     * @param month         month for the amount
+     */
+    public void customer_call_sms_useage(int customer_id, String month) {
+//        conn.connect();
+
+        String phone_number = customerPhoneNumber(customer_id);
+        int count_sms = countMessages(phone_number, month);
+        int count_bel = countCallMinutes(phone_number, month);
+
+        System.out.println("Klant: " + customer_id + " | Maand: " + month);
+        System.out.println("-----------------------");
+        System.out.println("Aantal SMS: " + count_sms);
+        System.out.println("Aantal Belminuten: " + count_bel);
+        System.out.println("-----------------------");
+
+//        conn.closeConnection();
+    }
+
+    /**
+     * Returns the customers phone number.
+     * @param customer_id
+     * @return  customers phone number
+     */
+    public String customerPhoneNumber(int customer_id) {
+        String phone_number = new String();
+        try {
+            PreparedStatement get_id = null;
+            get_id = conn.getConnection().prepareStatement(CUSTORMER_PHONE_NUMBER);
+            get_id.setInt(1,customer_id);
+            ResultSet klant_set = get_id.executeQuery();
+            klant_set.next();
+
+            phone_number = klant_set.getString("MOBIEL_NUMMER");
+            get_id.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return phone_number;
+    }
+
+    /**
+     * Returns number of sms messages send by the customer.
+     * @param phone_number
+     * @param month
+     * @return              number of messages
+     */
+    public int countMessages(String phone_number, String month) {
+        int count_sms = 0;
+        try {
+            PreparedStatement count_sms_customer = null;
+            count_sms_customer = conn.getConnection().prepareStatement(CUSTOMER_COUNT_SMS);
+            count_sms_customer.setString(1,phone_number);
+            count_sms_customer.setString(2, "%" + month + "%");
+            ResultSet sms_set = count_sms_customer.executeQuery();
+            sms_set.next();
+
+            count_sms = sms_set.getInt("count_sms");
+            count_sms_customer.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return count_sms;
+    }
+
+    /**
+     * Returns the minutes called by the customer.
+     * @param phone_number
+     * @param month
+     * @return              number of minutes
+     */
+    public int countCallMinutes(String phone_number, String month) {
+        int count_call = 0;
+        try {
+            PreparedStatement count_bel_customer = null;
+            count_bel_customer = conn.getConnection().prepareStatement(CUSTOMER_CALL_MINUTES);
+            count_bel_customer.setString(1, phone_number);
+            count_bel_customer.setString(2, "%" + month + "%");
+            count_bel_customer.setString(3, "%" + month + "%");
+            ResultSet bel_set = count_bel_customer.executeQuery();
+            bel_set.next();
+
+            count_call = bel_set.getInt("sum_minutes");
+            count_bel_customer.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return count_call;
+	}
 }

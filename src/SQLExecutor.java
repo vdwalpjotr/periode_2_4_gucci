@@ -33,6 +33,14 @@ public class SQLExecutor {
             "AND to_char(BEL_HISTORIE.START_DATUM_TIJD, 'Month') LIKE ? " +
             "AND to_char(BEL_HISTORIE.EIND_DATUM_TIJD, 'Month') LIKE ?";
 
+    public static final String CUSTOMER_GET_INVOICES = "SELECT FACTUUR.FACTUUR_ID, FACTUUR.TOTAAL_BEDRAG " +
+            "FROM BK.FACTUUR " +
+            "WHERE FACTUUR.KLANT_ID = ?";
+
+    public static final String CUSTOMER_UPDATE_SALDO = "UPDATE BK.BANK " +
+            "SET SALDO = SALDO - ? " +
+            "WHERE BANK.KLANT_ID = ?";
+
     private Connector conn;
     public SQLExecutor(Connector conn){
         this.conn = conn;
@@ -270,5 +278,61 @@ public class SQLExecutor {
             e.printStackTrace();
         }
         return count_call;
-	}
+    }
+
+    public void customerPayInvoices(int customer_id) throws SQLException {
+        PreparedStatement get_invoices = null;
+        PreparedStatement update_saldo = null;
+        ResultSet invoices = null;
+        try {
+            conn.getConnection().setAutoCommit(false);
+
+            get_invoices = conn.getConnection().prepareStatement(CUSTOMER_GET_INVOICES);
+            get_invoices.setInt(1, customer_id);
+            invoices = get_invoices.executeQuery();
+            while (invoices.next()) {
+                double totaal_bedrag = invoices.getDouble("TOTAAL_BEDRAG");
+                System.out.println(totaal_bedrag);
+
+                update_saldo = conn.getConnection().prepareStatement(CUSTOMER_UPDATE_SALDO);
+                update_saldo.setDouble(1, totaal_bedrag);
+                update_saldo.setInt(2, customer_id);
+                update_saldo.executeUpdate();
+
+                conn.getConnection().commit();
+                update_saldo.close();
+            }
+        } catch (SQLException e) {
+            e.getMessage();
+            conn.getConnection().rollback();
+        } finally {
+            if (get_invoices != null) {
+                get_invoices.close();
+            }
+            if (invoices != null) {
+                invoices.close();
+            }
+            if (update_saldo != null) {
+                update_saldo.close();
+            }
+
+            conn.getConnection().setAutoCommit(true);
+        }
+    }
+
+    public void update_saldo(int customer_id) throws SQLException {
+        PreparedStatement update_saldo = null;
+
+        try {
+            update_saldo = conn.getConnection().prepareStatement(CUSTOMER_UPDATE_SALDO);
+            update_saldo.setDouble(1, 100);
+            update_saldo.setInt(2, customer_id);
+            update_saldo.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        finally {
+            update_saldo.close();
+        }
+    }
 }

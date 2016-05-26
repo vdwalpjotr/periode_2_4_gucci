@@ -29,8 +29,7 @@ public class Main {
 //        }
 //        sqlExecutor.customer_call_sms_useage(2, "May");
         try {
-//            sqlExecutor.customerPayInvoices(2);
-            sqlExecutor.update_saldo(2);
+            sqlExecutor.customerPayInvoices(2);
         } catch (SQLException e) {
             e.printStackTrace();
         }

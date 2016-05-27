@@ -11,6 +11,7 @@ public class Main {
         Connector connector = new Connector();
         connector.connect();
         SQLExecutor sqlExecutor = new SQLExecutor(connector);
+        sqlExecutor.insertBankAccounts();
 //        Random rand = new Random();
 //        RandomDateGen randomDateGen = new RandomDateGen(2016);
 //        String randomDate = "";

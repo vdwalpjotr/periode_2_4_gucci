@@ -48,17 +48,67 @@ public class SQLExecutor {
             "SET STATUS = ? " +
             "WHERE FACTUUR.FACTUUR_ID = ?";
 
+    public static final String INSERT_BANK_ACCOUNTS = "INSERT INTO BK.BANK "
+            + "(KLANT_ID, REKENING_NUMMER, SALDO) "
+            + "VALUES(?, ?, ?)";
+
+    public static final String SELECT_ALL_CUSTOMERS = "SELECT KLANT_ID, VOORNAAM "
+            + "FROM BK.KLANT";
+
     private Connector conn;
     public SQLExecutor(Connector conn){
         this.conn = conn;
     }
 
+
     /**
-     * Insercustomer inserts customers into database with table BK.KLANT
+     * insertBank account selects all the customers and gives the customer new bankaccounts
+     */
+    public void insertBankAccounts(){
+        PreparedStatement prep = null;
+        PreparedStatement bankPrep = null;
+        ResultSet rs = null;
+        Random rand = new Random();
+        int ibannr = 1;
+        try{
+            prep = conn.getConnection().prepareStatement(SELECT_ALL_CUSTOMERS);
+            bankPrep = conn.getConnection().prepareStatement(INSERT_BANK_ACCOUNTS);
+            rs = prep.executeQuery();
+            while(rs.next()){
+                bankPrep.setInt(1, rs.getInt("KLANT_ID"));
+                bankPrep.setString(2, "NL"+(rand.nextInt(90)+10)+"RABO03261"+ibannr);
+                bankPrep.setInt(3, rand.nextInt(500));
+                bankPrep.executeUpdate();
+                ibannr++;
+            }
+        }catch(SQLException se){
+            se.printStackTrace();
+        }
+        finally{
+            if( bankPrep != null){
+                try{
+                    bankPrep.close();
+                }catch(SQLException e){
+                    e.printStackTrace();
+                }
+            }
+            if ( prep != null){
+                try{
+                    prep.close();
+                }catch(SQLException e){
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    /**
+     *
+     * Insertcustomer inserts customers into database with table BK.KLANT
      *
      */
     public void insertCustomers(){
-        int phoneNumber = 16670000;
+        int phoneNumber = 36670000;
         int customerID = 2;
         int housenumber = 1;
         PreparedStatement prep = null;
@@ -96,7 +146,7 @@ public class SQLExecutor {
 
             }
         }
-        conn.closeConnection();
+
     }
 
     /**

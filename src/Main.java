@@ -27,8 +27,12 @@ public class Main {
 //            sqlExecutor.insertSMSHistorie(verzender, ontvanger, 20, randomDate,"Dit is een voorbeeld smsje");
 //            sqlExecutor.insertBelHistorie(verzender, ontvanger, time);
 //        }
-        sqlExecutor.customer_call_sms_useage(2, "May");
-
+//        sqlExecutor.customer_call_sms_useage(2, "May");
+        try {
+            sqlExecutor.customerPayInvoices(2);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         connector.closeConnection();
 
 

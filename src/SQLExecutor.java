@@ -1,3 +1,5 @@
+import oracle.jdbc.proxy.annotation.Pre;
+
 import java.sql.*;
 import java.util.Random;
 
@@ -32,6 +34,19 @@ public class SQLExecutor {
             "WHERE BEL_HISTORIE.MOBIEL_ZENDER = ? " +
             "AND to_char(BEL_HISTORIE.START_DATUM_TIJD, 'Month') LIKE ? " +
             "AND to_char(BEL_HISTORIE.EIND_DATUM_TIJD, 'Month') LIKE ?";
+
+    public static final String CUSTOMER_GET_INVOICES = "SELECT FACTUUR.FACTUUR_ID, FACTUUR.TOTAAL_BEDRAG " +
+            "FROM BK.FACTUUR " +
+            "WHERE FACTUUR.KLANT_ID = ? " +
+            "AND FACTUUR.STATUS LIKE ?";
+
+    public static final String CUSTOMER_UPDATE_SALDO = "UPDATE BK.BANK " +
+            "SET SALDO = SALDO - ? " +
+            "WHERE BANK.KLANT_ID = ?";
+
+    public static final String UPDATE_INVOICE_STATUS = "UPDATE BK.FACTUUR " +
+            "SET STATUS = ? " +
+            "WHERE FACTUUR.FACTUUR_ID = ?";
 
     private Connector conn;
     public SQLExecutor(Connector conn){
@@ -270,5 +285,69 @@ public class SQLExecutor {
             e.printStackTrace();
         }
         return count_call;
-	}
+    }
+
+    public void customerPayInvoices(int customer_id) throws SQLException {
+        PreparedStatement get_invoices = null;
+        PreparedStatement update_saldo = null;
+        PreparedStatement update_invoice = null;
+        ResultSet invoices = null;
+        try {
+            conn.getConnection().setAutoCommit(false);
+
+            get_invoices = conn.getConnection().prepareStatement(CUSTOMER_GET_INVOICES);
+            get_invoices.setInt(1, customer_id);
+            get_invoices.setString(2,"Te betalen");
+            invoices = get_invoices.executeQuery();
+            while (invoices.next()) {
+                int invoice_id = invoices.getInt("FACTUUR_ID");
+                double total_costs = invoices.getDouble("TOTAAL_BEDRAG");
+                System.out.println(invoice_id + " | " + total_costs);
+
+                update_saldo = conn.getConnection().prepareStatement(CUSTOMER_UPDATE_SALDO);
+                update_saldo.setDouble(1, total_costs);
+                update_saldo.setInt(2, customer_id);
+                update_saldo.executeUpdate();
+
+                update_invoice = conn.getConnection().prepareStatement(UPDATE_INVOICE_STATUS);
+                update_invoice.setString(1, "Betaalt");
+                update_invoice.setInt(2, invoice_id);
+                update_invoice.executeUpdate();
+
+                conn.getConnection().commit();
+                update_saldo.close();
+                System.out.println("Betaalt");
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            conn.getConnection().rollback();
+        } finally {
+            if (get_invoices != null) {
+                get_invoices.close();
+            }
+            if (invoices != null) {
+                invoices.close();
+            }
+            if (update_saldo != null) {
+                update_saldo.close();
+            }
+
+            conn.getConnection().setAutoCommit(true);
+        }
+    }
+
+    public void update_saldo(int customer_id) throws SQLException {
+        PreparedStatement update_saldo = null;
+        try {
+            update_saldo = conn.getConnection().prepareStatement(CUSTOMER_UPDATE_SALDO);
+            update_saldo.setDouble(1, 100);
+            update_saldo.setInt(2, customer_id);
+            update_saldo.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        finally {
+            update_saldo.close();
+        }
+    }
 }

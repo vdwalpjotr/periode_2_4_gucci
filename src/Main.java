@@ -1,6 +1,9 @@
 import util.RandomDateGen;
+
+import java.io.Console;
 import java.sql.SQLException;
 import java.util.Random;
+import java.util.Scanner;
 
 /**
  * Created by peter on 21-May-16.
@@ -11,7 +14,7 @@ public class Main {
         Connector connector = new Connector();
         connector.connect();
         SQLExecutor sqlExecutor = new SQLExecutor(connector);
-        sqlExecutor.insertBankAccounts();
+        //sqlExecutor.insertBankAccounts();
 //        Random rand = new Random();
 //        RandomDateGen randomDateGen = new RandomDateGen(2016);
 //        String randomDate = "";
@@ -28,7 +31,28 @@ public class Main {
 //            sqlExecutor.insertSMSHistorie(verzender, ontvanger, 20, randomDate,"Dit is een voorbeeld smsje");
 //            sqlExecutor.insertBelHistorie(verzender, ontvanger, time);
 //        }
-//        sqlExecutor.customer_call_sms_useage(2, "May");
+
+        System.out.println("Welcome,");
+        System.out.println("This console app will give you the history of a certain customer.");
+        boolean correctQuestion = false;
+        while( correctQuestion == false) {
+            Scanner reader = new Scanner(System.in);
+            System.out.println("Please enter the customer_id");
+            int input = reader.nextInt();
+            System.out.println("Which month would you like to find (write in English) :");
+            String month = reader.next();
+            System.out.println("Would you like to find customer: " + input + "\nin the month:" + month + "? \n10(Type 'y' to continue )");
+            String y = reader.next();
+            if (y.equals("y")) {
+                correctQuestion = true;
+                sqlExecutor.customer_call_sms_useage(input, month);
+
+            }
+            else if(y.equals("q")){
+                System.out.println("Goodbye");
+                correctQuestion = true;
+            }
+        }
         try {
             sqlExecutor.customerPayInvoices(2);
         } catch (SQLException e) {

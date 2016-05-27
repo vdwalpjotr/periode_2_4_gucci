@@ -5,8 +5,8 @@ import java.sql.*;
  */
 public class Connector {
     public static final String DRIVER_URL = "oracle.jdbc.OracleDriver";
-//    public static final String DATABASE_URL = "jdbc:oracle:thin:system/oracle@192.168.99.100:49161:xe";
-    public static final String DATABASE_URL = "jdbc:oracle:thin:system/oracle@localhost:49161:xe";
+    public static final String DATABASE_URL = "jdbc:oracle:thin:system/oracle@192.168.99.100:49161:xe";
+//    public static final String DATABASE_URL = "jdbc:oracle:thin:system/oracle@localhost:49161:xe";
     private Connection conn;
 
     public void connect() {

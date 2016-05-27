@@ -1,8 +1,6 @@
 package util;
 
-import oracle.sql.DATE;
 
-import java.util.GregorianCalendar;
 import java.util.Random;
 
 /**

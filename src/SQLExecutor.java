@@ -33,27 +33,33 @@ public class SQLExecutor {
             "AND to_char(BEL_HISTORIE.START_DATUM_TIJD, 'Month') LIKE ? " +
             "AND to_char(BEL_HISTORIE.EIND_DATUM_TIJD, 'Month') LIKE ?";
 
+    public static final String INSERT_IBAN = "INSERT INTO BK.BANK "
+            + "(REKENING_NUMMER, SALDO, KLANT_ID)"
+            +"VALUES(?, ?, ?)";
+
     private Connector conn;
     public SQLExecutor(Connector conn){
         this.conn = conn;
     }
 
     /**
-     * Insercustomer inserts customers into database with table BK.KLANT
+     * Insertcustomer inserts customers into database with table BK.KLANT
      *
      */
     public void insertCustomers(){
-        int phoneNumber = 16670000;
-        int customerID = 2;
+        int phoneNumber = 2363711;
+        int customerID = 20000;
         int housenumber = 1;
         PreparedStatement prep = null;
+
         for(int i=0; i<1000; i++) {
             try {
                 prep = conn.getConnection().prepareStatement(INSERT_CUSTOMERS);
+
                 prep.setString(1, "Klant-" + customerID);
                 prep.setString(2, "achternaam");
                 prep.setString(3, String.valueOf("m"));
-                prep.setString(4, "06-" + phoneNumber);
+                prep.setString(4, "ab-" + phoneNumber);
                 prep.setInt(5, housenumber);
                 prep.setString(6, "9741MC");
                 prep.setString(7, "Groningen");
@@ -62,8 +68,6 @@ public class SQLExecutor {
                 prep.setString(10, "SMS_BUDGET");
                 prep.setString(11, "Klantenstraat");
                 prep.executeQuery();
-
-
                 phoneNumber++;
                 customerID++;
                 housenumber++;
@@ -78,11 +82,13 @@ public class SQLExecutor {
                         e.printStackTrace();
                     }
                 }
-
             }
         }
-        conn.closeConnection();
+
     }
+
+
+
 
     /**
      * Inserts the sms historie using the customer IDs
@@ -213,10 +219,17 @@ public class SQLExecutor {
             get_id = conn.getConnection().prepareStatement(CUSTORMER_PHONE_NUMBER);
             get_id.setInt(1,customer_id);
             ResultSet klant_set = get_id.executeQuery();
-            klant_set.next();
 
-            phone_number = klant_set.getString("MOBIEL_NUMMER");
+            if (!klant_set.next()) {
+                phone_number = "none";
+            }
+            else {
+                phone_number = klant_set.getString("MOBIEL_NUMMER");
+            }
+
+            klant_set.close();
             get_id.close();
+
         } catch (SQLException e) {
             e.printStackTrace();
         }

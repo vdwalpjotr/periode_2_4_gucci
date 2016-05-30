@@ -13,7 +13,8 @@ public class Main {
     public static void main(String[] args) {
         Connector connector = new Connector();
         connector.connect();
-        SQLExecutor sqlExecutor = new SQLExecutor(connector);
+//        SQLExecutor sqlExecutor = new SQLExecutor(connector);
+        SQLExecutor2 sqlExecutor2 = new SQLExecutor2(connector);
         //sqlExecutor.insertBankAccounts();
 //        Random rand = new Random();
 //        RandomDateGen randomDateGen = new RandomDateGen(2016);
@@ -32,29 +33,32 @@ public class Main {
 //            sqlExecutor.insertBelHistorie(verzender, ontvanger, time);
 //        }
 
-        System.out.println("Welcome,");
-        System.out.println("This console app will give you the history of a certain customer.");
-        boolean correctQuestion = false;
-        while( correctQuestion == false) {
-            Scanner reader = new Scanner(System.in);
-            System.out.println("Please enter the customer_id");
-            int input = reader.nextInt();
-            System.out.println("Which month would you like to find (write in English) :");
-            String month = reader.next();
-            System.out.println("Would you like to find customer: " + input + "\nin the month:" + month + "? \n10(Type 'y' to continue )");
-            String y = reader.next();
-            if (y.equals("y")) {
-                correctQuestion = true;
-                sqlExecutor.customer_call_sms_useage(input, month);
-
-            }
-            else if(y.equals("q")){
-                System.out.println("Goodbye");
-                correctQuestion = true;
-            }
-        }
+//        System.out.println("Welcome,");
+//        System.out.println("This console app will give you the history of a certain customer.");
+//        boolean correctQuestion = false;
+//        while( correctQuestion == false) {
+//            Scanner reader = new Scanner(System.in);
+//            System.out.println("Please enter the customer_id");
+//            int input = reader.nextInt();
+//            System.out.println("Which month would you like to find (write in English) :");
+//            String month = reader.next();
+//            System.out.println("Would you like to find customer: " + input + "\nin the month:" + month + "? \n10(Type 'y' to continue )");
+//            String y = reader.next();
+//            if (y.equals("y")) {
+//                correctQuestion = true;
+//                sqlExecutor.customer_call_sms_useage(input, month);
+//
+//            }
+//            else if(y.equals("q")){
+//                System.out.println("Goodbye");
+//                correctQuestion = true;
+//            }
+//        }
         try {
-            sqlExecutor.customerPayInvoices(2);
+            long startTime = System.currentTimeMillis();
+            sqlExecutor2.setEmployeesHouses();
+            long estimatedTime = System.currentTimeMillis() - startTime;
+            System.out.println(estimatedTime + " ms");
         } catch (SQLException e) {
             e.printStackTrace();
         }

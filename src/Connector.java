@@ -4,9 +4,10 @@ import java.sql.*;
  * Connector class connects to the oracle database
  */
 public class Connector {
-    public static final String DRIVER_URL = "oracle.jdbc.OracleDriver";
-    public static final String DATABASE_URL = "jdbc:oracle:thin:system/oracle@192.168.99.100:49161:xe";
-//    public static final String DATABASE_URL = "jdbc:oracle:thin:system/oracle@192.168.178.22:49161:xe";
+//    public static final String DRIVER_URL = "oracle.jdbc.OracleDriver";
+    public static final String DRIVER_URL = "com.mysql.jdbc.Driver";
+    //    public static final String DATABASE_URL = "jdbc:oracle:thin:system/oracle@192.168.99.100:49161:xe";
+    public static final String DATABASE_URL = "jdbc:mysql://localhost:3306/funda?user=root&password=";
     private Connection conn;
 
     public void connect() {
